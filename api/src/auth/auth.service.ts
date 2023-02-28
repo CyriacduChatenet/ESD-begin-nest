@@ -1,10 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 import { UserService } from '../user/user.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
@@ -17,41 +13,36 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.userService.findOneByEmail(email);
-    if (user && user.password === pass) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  }
-
-  async signin(signinAuthDto: SigninAuthDto) {
-    const userInDB = await this.userService.findOneByEmail(signinAuthDto.email);
+  async validateUser(email: string, password: string): Promise<any> {
+    const userInDB = await this.userService.findOneByEmail(email);
 
     if (!userInDB) {
       throw new NotFoundException('User not found');
     }
 
     const IsPasswordMatching = await bcrypt.compare(
-      signinAuthDto.password,
+      password,
       userInDB.password,
     );
 
     if (!IsPasswordMatching) {
-      throw new UnauthorizedException('auth required');
+      throw new NotFoundException('Password not matching');
     }
 
+    return IsPasswordMatching;
+  }
+
+  async signin(signinAuthDto: SigninAuthDto) {
+    const userInDB = await this.userService.findOneByEmail(signinAuthDto.email);
     const payload = {
       firstName: userInDB.firstName,
       lastName: userInDB.lastName,
       email: userInDB.email,
-      password: userInDB.password,
       userId: userInDB.id,
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 

@@ -18,7 +18,7 @@ export class User extends Timestamp {
   @Column({ unique: true })
   email: string;
 
-  @Column({ select: false })
+  @Column()
   password: string;
 
   @OneToMany(() => Comment, (comment) => comment.user)
