@@ -38,13 +38,27 @@ export class UserService {
     }
   }
 
-  async findOne(id: string) {
+  async findOneById(id: string) {
     try {
       return await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.posts', 'post')
         .leftJoinAndSelect('user.comments', 'comment')
         .where('user.id = :id', { id })
+        .orderBy('comment.id', 'DESC')
+        .getOne();
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async findOneByEmail(email: string) {
+    try {
+      return await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.posts', 'post')
+        .leftJoinAndSelect('user.comments', 'comment')
+        .where('user.email = :email', { email })
         .orderBy('comment.id', 'DESC')
         .getOne();
     } catch (error) {
