@@ -1,10 +1,14 @@
 import { Category } from 'src/category/entities/category.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   ManyToMany,
   JoinTable,
+  OneToMany,
+  ManyToOne,
 } from 'typeorm';
 
 import { Timestamp } from '../../utils/timestamp.util';
@@ -23,9 +27,13 @@ export class Post extends Timestamp {
   @Column({ default: false })
   published: boolean;
 
-  @ManyToMany(() => Category, (category) => category.posts, {
-    cascade: ['insert'],
-  })
+  @ManyToMany(() => Category, (category) => category.posts)
   @JoinTable()
   categories: Category[];
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
+
+  @ManyToOne(() => User, (user) => user.posts)
+  user: User;
 }

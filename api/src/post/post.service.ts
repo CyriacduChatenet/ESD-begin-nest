@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -21,18 +17,31 @@ export class PostService {
     return await this.postRepository.save(newPost);
   }
 
-  async findAll() {
-    return await this.postRepository
+  async findAll(queries) {
+    const { categories } = queries;
+
+    const query = await this.postRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.categories', 'categories')
-      .orderBy('post.createdAt', 'DESC')
-      .getMany();
+      .leftJoinAndSelect('post.categories', 'category')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('post.user', 'user')
+      .orderBy('post.createdAt', 'DESC');
+
+    if (categories !== undefined) {
+      const categoryNames = categories.split(',');
+      query.andWhere('category.name IN (:...categoryNames)', { categoryNames });
+    }
+
+    const postList = await query.getMany();
+    return postList;
   }
 
   async findOne(id: string) {
     return await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.categories', 'categories')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('post.user', 'user')
       .where('post.id = :id', { id })
       .getOne();
   }
