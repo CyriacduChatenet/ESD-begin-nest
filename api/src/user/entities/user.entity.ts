@@ -15,10 +15,10 @@ export class User extends Timestamp {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @OneToMany(() => Comment, (comment) => comment.user)
