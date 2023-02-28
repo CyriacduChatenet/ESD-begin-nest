@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PostModule } from './post/post.module';
 import { CategoryModule } from './category/category.module';
 import { UserModule } from './user/user.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module';
     PostModule,
     CategoryModule,
     UserModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
