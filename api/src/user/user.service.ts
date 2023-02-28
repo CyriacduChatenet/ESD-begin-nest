@@ -1,26 +1,70 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
+      const user = this.userRepository.create({
+        ...createUserDto,
+        password: await encryptedPassword,
+      });
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    try {
+      return await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.posts', 'post')
+        .leftJoinAndSelect('user.comments', 'comment')
+        .orderBy('comment.id', 'DESC')
+        .getMany();
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    try {
+      return await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.posts', 'post')
+        .leftJoinAndSelect('user.comments', 'comment')
+        .where('user.id = :id', { id })
+        .orderBy('comment.id', 'DESC')
+        .getOne();
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      return await this.userRepository.update(id, updateUserDto);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    try {
+      return await this.userRepository.softDelete(id);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 }
