@@ -7,7 +7,7 @@ function App() {
 	const [data, setData] = useState([]);
 
 	const handleFetch = async () => {
-		const response = await fetch('http://localhost:8000/api/v1/post');
+		const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/post`);
 		const data = await response.json();
 		setData(data);
 	};
@@ -35,10 +35,10 @@ function App() {
 			</div>
 			{data.map((item: any) => (
 				<div key={item.id}>
-          <h2>{item.title}</h2>
-          <p>{item.content}</p>
-          <p>{item.createdAt}</p>
-        </div>
+					<h2>{item.title}</h2>
+					<p>{item.content}</p>
+					<p>{item.createdAt}</p>
+				</div>
 			))}
 		</div>
 	);
